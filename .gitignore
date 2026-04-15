@@ -4,3 +4,5 @@ node_modules/
 *.log
 .DS_Store
 Project-IAMS-/
+create-coordinator.js
+TODO.md

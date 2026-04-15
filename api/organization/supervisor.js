@@ -1,15 +1,21 @@
 // GET  /api/organization/supervisor  — list industrial supervisors for this org
 // POST /api/organization/supervisor  — org creates an industrial supervisor account
 // Body: { email, password, full_name, department?, phone? }
-const { adminClient, send, readBody, verifyToken } = require("../_shared");
+const { createClient } = require("@supabase/supabase-js");
+const { adminClient, send, readBody } = require("../_shared");
 
 module.exports = async function handler(req, res) {
   try {
     const auth = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
     if (!auth) return send(res, 401, { ok: false, error: "Missing auth token" });
 
-    const user = await verifyToken(auth).catch(() => null);
-    if (!user) return send(res, 401, { ok: false, error: "Invalid token" });
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const anonKey    = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!supabaseUrl || !anonKey) return send(res, 500, { ok: false, error: "Missing env vars" });
+    const userSb = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: `Bearer ${auth}` } } });
+    const { data: authData, error: uerr } = await userSb.auth.getUser();
+    if (uerr || !authData || !authData.user) return send(res, 401, { ok: false, error: uerr ? uerr.message : "Invalid token" });
+    const user = authData.user;
 
     const sb = adminClient();
 
