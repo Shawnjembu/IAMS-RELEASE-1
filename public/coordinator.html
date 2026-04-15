@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Coordinator Panel</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+
+  <div class="page-body">
+    <div class="container">
+
+      <div class="flex-between mb-16">
+        <h1>Coordinator Panel</h1>
+      </div>
+
+      <div id="coord-alert" class="alert hidden mb-16"></div>
+
+      <!-- ─── TABS ─── -->
+      <div class="auth-tabs mb-16" style="display:flex;gap:4px;border-bottom:2px solid var(--border)">
+        <div class="auth-tab active" data-tab="students"    style="cursor:pointer;padding:10px 18px">Students</div>
+        <div class="auth-tab"        data-tab="supervisors" style="cursor:pointer;padding:10px 18px">Supervisors</div>
+        <div class="auth-tab"        data-tab="logbooks"    style="cursor:pointer;padding:10px 18px">Logbooks</div>
+        <div class="auth-tab"        data-tab="reports"     style="cursor:pointer;padding:10px 18px">Reports</div>
+        <div class="auth-tab"        data-tab="deadlines"   style="cursor:pointer;padding:10px 18px">Deadlines</div>
+      </div>
+
+      <!-- ══════ STUDENTS TAB ══════ -->
+      <div id="panel-students" class="coord-panel">
+        <div class="flex-between mb-16">
+          <h2>All Students</h2>
+          <input type="text" id="student-search" class="form-control" placeholder="Search by name or email…" style="max-width:260px"/>
+        </div>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th><th>Email</th><th>Programme</th><th>Year</th><th>Placement</th><th>Grade</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="7" class="muted small text-center">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════ SUPERVISORS TAB ══════ -->
+      <div id="panel-supervisors" class="coord-panel" style="display:none">
+        <div class="grid-2 mb-16" style="gap:24px;display:grid;grid-template-columns:1fr 1fr">
+
+          <!-- Create supervisor -->
+          <div class="card" style="padding:20px">
+            <h2 class="mb-16">Add Supervisor</h2>
+            <div id="sup-create-alert" class="alert hidden mb-8"></div>
+            <form id="supCreateForm">
+              <div class="form-group">
+                <label>Role <span class="required">*</span></label>
+                <select id="supRole" class="form-control">
+                  <option value="industrial_supervisor">Industrial Supervisor</option>
+                  <option value="university_supervisor">University Supervisor</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" id="supName" class="form-control" placeholder="Dr. Jane Smith"/>
+                <span class="field-error" id="supName-err"></span>
+              </div>
+              <div class="form-group">
+                <label>Email <span class="required">*</span></label>
+                <input type="email" id="supEmail" class="form-control" placeholder="supervisor@example.com"/>
+                <span class="field-error" id="supEmail-err"></span>
+              </div>
+              <div class="form-group">
+                <label>Password <span class="required">*</span></label>
+                <input type="password" id="supPass" class="form-control" placeholder="Min 6 characters"/>
+                <span class="field-error" id="supPass-err"></span>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Department</label>
+                  <input type="text" id="supDept" class="form-control" placeholder="e.g. Computer Science"/>
+                </div>
+                <div class="form-group">
+                  <label>Specialization</label>
+                  <input type="text" id="supSpec" class="form-control" placeholder="e.g. Software Engineering"/>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" id="btnSupCreate">
+                <span class="spinner"></span><span class="btn-label">Create Supervisor</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Assign supervisor to student -->
+          <div class="card" style="padding:20px">
+            <h2 class="mb-16">Assign to Student</h2>
+            <div id="sup-assign-alert" class="alert hidden mb-8"></div>
+            <form id="supAssignForm">
+              <div class="form-group">
+                <label>Student <span class="required">*</span></label>
+                <select id="supAssignStudent" class="form-control">
+                  <option value="">Select student…</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Industrial Supervisor</label>
+                <select id="supAssignInd" class="form-control">
+                  <option value="">None</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>University Supervisor</label>
+                <select id="supAssignUni" class="form-control">
+                  <option value="">None</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" id="btnSupAssign">
+                <span class="spinner"></span><span class="btn-label">Save Assignment</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Supervisors list -->
+        <div class="card">
+          <div class="card-header"><h2>All Supervisors</h2></div>
+          <table class="table mt-8">
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Role</th><th>Organisation / Source</th></tr>
+            </thead>
+            <tbody id="supervisors-tbody">
+              <tr><td colspan="4" class="muted small text-center">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════ LOGBOOKS TAB ══════ -->
+      <div id="panel-logbooks" class="coord-panel" style="display:none">
+        <div class="flex-between mb-16">
+          <h2>All Logbook Entries</h2>
+          <select id="logbook-student-filter" class="form-control" style="max-width:260px">
+            <option value="">All students</option>
+          </select>
+        </div>
+        <div id="logbook-entries-coord">
+          <p class="muted small text-center">Select a student or load all.</p>
+        </div>
+        <button class="btn btn-secondary mt-8" id="btnLoadLogbooks">Load Entries</button>
+      </div>
+
+      <!-- ══════ REPORTS TAB ══════ -->
+      <div id="panel-reports" class="coord-panel" style="display:none">
+        <div class="flex-between mb-16"><h2>Industrial Reports</h2></div>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr><th>Student</th><th>Title</th><th>Status</th><th>Score</th><th>Submitted</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="reports-tbody">
+              <tr><td colspan="6" class="muted small text-center">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Grade override -->
+        <div class="card mt-16" style="padding:20px">
+          <h2 class="mb-16">Override Final Grade</h2>
+          <div id="override-alert" class="alert hidden mb-8"></div>
+          <form id="overrideForm" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-group" style="margin:0;flex:2;min-width:200px">
+              <label>Student</label>
+              <select id="override-student" class="form-control"><option value="">Select student…</option></select>
+            </div>
+            <div class="form-group" style="margin:0;flex:1;min-width:100px">
+              <label>Grade (0–100)</label>
+              <input type="number" id="override-grade" class="form-control" min="0" max="100" step="0.5"/>
+            </div>
+            <div class="form-group" style="margin:0;flex:2;min-width:200px">
+              <label>Reason</label>
+              <input type="text" id="override-reason" class="form-control" placeholder="Optional explanation"/>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-primary" id="btnOverride">
+                <span class="spinner"></span><span class="btn-label">Override</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ══════ DEADLINES TAB ══════ -->
+      <div id="panel-deadlines" class="coord-panel" style="display:none">
+        <div class="flex" style="gap:24px;flex-wrap:wrap;align-items:flex-start">
+
+          <!-- Create deadline form -->
+          <div class="card" style="flex:1;min-width:280px;max-width:400px;padding:20px">
+            <h3 class="mb-16" style="font-size:1rem">Create Deadline</h3>
+            <div id="deadline-alert"></div>
+            <form id="deadline-form">
+              <div class="form-group">
+                <label class="form-label">Title <span class="danger">*</span></label>
+                <input id="dl-title" type="text" class="form-control" placeholder="e.g. Logbook submission week 6" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Due Date</label>
+                <input id="dl-due" type="date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Audience</label>
+                <select id="dl-role" class="form-control">
+                  <option value="all">All roles</option>
+                  <option value="student">Students</option>
+                  <option value="organization">Organisations</option>
+                  <option value="industrial_supervisor">Industrial Supervisors</option>
+                  <option value="university_supervisor">University Supervisors</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Message (optional)</label>
+                <textarea id="dl-message" class="form-control" rows="3" placeholder="Additional details…"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary w-full">Save Deadline</button>
+            </form>
+          </div>
+
+          <!-- Existing deadlines list -->
+          <div style="flex:2;min-width:280px">
+            <h3 class="mb-16" style="font-size:1rem">Existing Deadlines</h3>
+            <div id="deadlines-list"><p class="small muted">Loading…</p></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./coordinator.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – My Profile</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <style>
+    .skills-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:8px; margin-top:8px; }
+    .skill-chip  { display:flex; align-items:center; gap:8px; padding:8px 12px;
+                   background:var(--bg-input); border:1.5px solid var(--border);
+                   border-radius:var(--radius-sm); cursor:pointer; transition:var(--transition); }
+    .skill-chip:hover      { border-color:var(--accent); }
+    .skill-chip input      { accent-color:var(--accent); width:16px; height:16px; cursor:pointer; }
+    .skill-chip.selected   { border-color:var(--accent); background:rgba(59,110,240,.12); }
+    .skill-chip span       { font-size:.875rem; color:var(--text); user-select:none; }
+    select.form-control    { background:var(--bg-input); color:var(--text); border:1px solid var(--border);
+                             border-radius:var(--radius-sm); padding:10px 12px; width:100%;
+                             font-family:inherit; font-size:.9rem; }
+    select.form-control:focus { border-color:var(--border-focus); outline:none; }
+    .upload-area { border:2px dashed var(--border); border-radius:var(--radius-sm);
+                   padding:20px; text-align:center; background:var(--bg-input);
+                   cursor:pointer; transition:var(--transition); }
+    .upload-area:hover { border-color:var(--accent); }
+    .upload-area input[type=file] { display:none; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+
+  <div class="page-body">
+    <div class="container-md">
+
+      <div class="flex-between mb-16">
+        <h1>My Profile</h1>
+        <a href="/dashboard.html" class="btn btn-secondary btn-sm">← Back</a>
+      </div>
+
+      <div id="profile-alert" class="alert hidden"></div>
+
+      <form id="profileForm" novalidate>
+
+        <!-- Personal Info -->
+        <div class="card">
+          <div class="card-header"><h2>Personal Information</h2></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfName">Full name <span class="required">*</span></label>
+              <input type="text" id="pfName" placeholder="Your full name" required/>
+              <span class="field-error" id="pfName-err"></span>
+            </div>
+            <div class="form-group">
+              <label for="pfPhone">Phone number</label>
+              <input type="tel" id="pfPhone" placeholder="+267 7X XXX XXX"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email <span class="small muted">(cannot change)</span></label>
+            <input type="email" id="pfEmail" disabled/>
+          </div>
+        </div>
+
+        <!-- Academic Details -->
+        <div class="card">
+          <div class="card-header"><h2>Academic Details</h2></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfStudentNum">Student number</label>
+              <input type="text" id="pfStudentNum" placeholder="e.g. 201900123"/>
+            </div>
+            <div class="form-group">
+              <label for="pfProgram">Programme / Qualification</label>
+              <input type="text" id="pfProgram" placeholder="e.g. BSc Computer Science"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pfYear">Year of study</label>
+            <select id="pfYear" class="form-control">
+              <option value="">Select…</option>
+              <option value="1">1st Year</option>
+              <option value="2">2nd Year</option>
+              <option value="3">3rd Year</option>
+              <option value="4">4th Year / Honours</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="card">
+          <div class="card-header"><h2>Skills &amp; Expertise <span class="required">*</span></h2></div>
+          <p class="small muted">Select all skills that apply to you. These are used for matching with organisations.</p>
+          <div class="skills-grid" id="skills-grid">
+            <!-- populated by JS -->
+          </div>
+          <div class="form-group mt-16">
+            <label for="pfOtherSkills">Other skills <span class="small muted">(comma-separated)</span></label>
+            <input type="text" id="pfOtherSkills" placeholder="e.g. AutoCAD, Figma, R"/>
+          </div>
+          <span class="field-error" id="pfSkills-err"></span>
+        </div>
+
+        <!-- Placement Preferences -->
+        <div class="card">
+          <div class="card-header"><h2>Placement Preferences</h2></div>
+
+          <div class="form-group">
+            <label for="pfLocation">Preferred placement location <span class="required">*</span></label>
+            <select id="pfLocation" class="form-control">
+              <option value="">Select city…</option>
+              <option>Gaborone</option>
+              <option>Francistown</option>
+              <option>Lobatse</option>
+              <option>Selebi-Phikwe</option>
+              <option>Maun</option>
+              <option>Serowe</option>
+              <option>Kanye</option>
+              <option>Molepolole</option>
+              <option>Mahalapye</option>
+              <option>Mogoditshane</option>
+              <option>Other</option>
+            </select>
+            <span class="field-error" id="pfLocation-err"></span>
+          </div>
+        </div>
+
+        <!-- CV Upload -->
+        <div class="card">
+          <div class="card-header"><h2>CV / Resume <span class="small muted">(optional)</span></h2></div>
+          <div id="cv-current" class="small muted mb-8" style="display:none">
+            Current CV: <a id="cv-link" href="#" target="_blank" class="accent">View uploaded CV</a>
+          </div>
+          <div class="upload-area" id="cv-upload-area" onclick="document.getElementById('pfCv').click()">
+            <input type="file" id="pfCv" accept=".pdf,.doc,.docx"/>
+            <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--accent);margin-bottom:8px"></i>
+            <p class="small">Click to upload your CV (PDF or DOC, max 5 MB)</p>
+            <p class="small muted" id="cv-filename">No file chosen</p>
+          </div>
+          <span class="small muted" id="cv-status" style="display:block;margin-top:8px"></span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btnSave">
+            <span class="spinner"></span>
+            <span class="btn-label">Save Profile</span>
+          </button>
+          <a href="/dashboard.html" class="btn btn-secondary">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./student-profile.js"></script>
+</body>
+</html>

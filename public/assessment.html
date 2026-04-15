@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Assessments</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+  <div class="page-body">
+    <div class="container">
+      <div id="page-loading" class="muted text-center mt-24">Loading…</div>
+      <div id="page-content" style="display:none">
+        <div class="flex-between mb-16">
+          <h1 id="page-title">Assessments</h1>
+          <a href="/coordinator.html" class="btn btn-secondary btn-sm">← Back</a>
+        </div>
+
+        <div id="assess-alert" class="alert hidden mb-16"></div>
+
+        <!-- Grade card -->
+        <div class="card mb-16" style="padding:24px">
+          <h2 class="mb-16">Final Grade</h2>
+          <div class="grid-3">
+            <div class="card" style="padding:16px;text-align:center">
+              <div class="small muted mb-4">Report (40%)</div>
+              <div style="font-size:2rem;font-weight:700" id="g-report">—</div>
+            </div>
+            <div class="card" style="padding:16px;text-align:center">
+              <div class="small muted mb-4">Visits avg (60%)</div>
+              <div style="font-size:2rem;font-weight:700" id="g-visits">—</div>
+            </div>
+            <div class="card" style="padding:16px;text-align:center;background:var(--primary);color:#fff">
+              <div class="small mb-4" style="opacity:.8">Final Grade</div>
+              <div style="font-size:2.5rem;font-weight:700" id="g-final">—</div>
+              <div style="font-size:1.1rem" id="g-letter">—</div>
+            </div>
+          </div>
+          <p class="small muted mt-8" id="g-override-note" style="display:none"></p>
+        </div>
+
+        <!-- Component breakdown -->
+        <div class="grid-2 mb-16" style="gap:16px;display:grid;grid-template-columns:1fr 1fr">
+          <!-- Report -->
+          <div class="card" style="padding:20px">
+            <h3 class="mb-8">Industrial Report</h3>
+            <div id="report-detail">
+              <p class="small muted">No report submitted.</p>
+            </div>
+          </div>
+
+          <!-- Evaluations -->
+          <div class="card" style="padding:20px">
+            <h3 class="mb-8">University Visit Evaluations</h3>
+            <div id="evals-detail">
+              <p class="small muted">No evaluations recorded.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grade override (coordinator only) -->
+        <div class="card" style="padding:20px" id="override-section">
+          <h3 class="mb-16">Override Final Grade</h3>
+          <div id="override-alert" class="alert hidden mb-8"></div>
+          <form id="overrideForm" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-group" style="margin:0;flex:1;min-width:100px">
+              <label>New Grade (0–100)</label>
+              <input type="number" id="ov-grade" class="form-control" min="0" max="100" step="0.5"/>
+            </div>
+            <div class="form-group" style="margin:0;flex:3;min-width:200px">
+              <label>Reason</label>
+              <input type="text" id="ov-reason" class="form-control" placeholder="Reason for override…"/>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-primary" id="btnOverride">
+                <span class="spinner"></span><span class="btn-label">Override</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./assessment.js"></script>
+</body>
+</html>

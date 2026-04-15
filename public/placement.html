@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – My Placement</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+  <div class="page-body">
+    <div class="container">
+      <div id="page-loading" class="muted text-center mt-24">Loading placement…</div>
+      <div id="page-content" style="display:none">
+        <h1 class="mb-16">My Placement</h1>
+
+        <!-- No placement -->
+        <div id="no-placement" style="display:none" class="card text-center">
+          <div style="font-size:3rem;margin-bottom:12px;">🏢</div>
+          <h2>No placement yet</h2>
+          <p class="muted">You have not been assigned to an organisation. The coordinator will assign you once matching is complete.</p>
+          <a href="/dashboard.html" class="btn btn-secondary mt-16">Back to Dashboard</a>
+        </div>
+
+        <!-- Placement card -->
+        <div id="placement-card" style="display:none" class="card">
+          <div class="card-header"><h2>Placement Details</h2></div>
+          <table class="table mt-16">
+            <tr><th>Status</th><td><span id="pl-status" class="badge-role"></span></td></tr>
+            <tr><th>Organisation</th><td id="pl-org">—</td></tr>
+            <tr><th>Assigned on</th><td id="pl-date">—</td></tr>
+          </table>
+          <div class="row mt-16">
+            <a href="/dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="/logbook.html"   class="btn btn-primary">My Logbook</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./placement.js"></script>
+</body>
+</html>
