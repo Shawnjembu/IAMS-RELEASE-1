@@ -25,26 +25,37 @@ module.exports = async function handler(req, res) {
     if (!profile || profile.role !== "organization")
       return send(res, 403, { ok: false, error: "Organisation account required" });
 
-    // ---- GET: list supervisors for this org ----
+    // ---- GET: list supervisors for this org (two-step, avoids brittle FK name) ----
     if (req.method === "GET") {
-      const { data, error } = await sb
+      const { data: spRows, error } = await sb
         .from("supervisor_profiles")
-        .select(`
-          id, department, phone,
-          profiles!supervisor_profiles_id_fkey(id, full_name, email, role)
-        `)
+        .select("id, department, phone")
         .eq("org_id", user.id);
 
       if (error) return send(res, 500, { ok: false, error: error.message });
 
-      const supervisors = (data || []).map(sp => ({
-        id:         sp.id,
-        full_name:  sp.profiles ? sp.profiles.full_name : null,
-        email:      sp.profiles ? sp.profiles.email : null,
-        role:       sp.profiles ? sp.profiles.role : "industrial_supervisor",
-        department: sp.department,
-        phone:      sp.phone,
-      }));
+      // Fetch profiles separately
+      const ids = (spRows || []).map(sp => sp.id);
+      let profileMap = {};
+      if (ids.length > 0) {
+        const { data: profs } = await sb
+          .from("profiles")
+          .select("id, full_name, email, role")
+          .in("id", ids);
+        (profs || []).forEach(p => { profileMap[p.id] = p; });
+      }
+
+      const supervisors = (spRows || []).map(sp => {
+        const p = profileMap[sp.id] || {};
+        return {
+          id:         sp.id,
+          full_name:  p.full_name  || null,
+          email:      p.email      || null,
+          role:       p.role       || "industrial_supervisor",
+          department: sp.department,
+          phone:      sp.phone,
+        };
+      });
 
       return send(res, 200, { ok: true, supervisors });
     }

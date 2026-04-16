@@ -976,29 +976,29 @@ function _initStarRatings(containerId, valId, submitId) {
 async function _submitReport(token) {
   var rating = parseInt(document.querySelector('#report-stars .filled:last-child')?.dataset.rating || 0);
   var comments = document.getElementById('report-comments').value.trim();
-  var file = document.getElementById('report-file').files[0];
 
   if (rating === 0 || !comments) {
     UI.showToast("error", "Rating and comments required");
     return;
   }
 
-  var formData = new FormData();
-  formData.append('student_id', window.currentStudentId);
-  formData.append('rating', rating);
-  formData.append('comments', comments);
-  if (file) formData.append('file', file);
+  // Convert 1-5 stars to 0-100 score (each star = 20 points)
+  var score = rating * 20;
 
   try {
-    var resp = await fetch("/api/reports/submit", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + token },
-      body: formData
+    var resp = await fetch("/api/reports/review", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({
+        student_id: window.currentStudentId,
+        score:      score,
+        comments:   comments
+      })
     });
     var result = await resp.json();
     if (!result.ok) throw new Error(result.error);
-    
-    UI.showToast("success", "Report submitted!");
+
+    UI.showToast("success", "Report graded (" + score + "/100)!");
     _closeModals();
     _loadSupervisorStats(token, window._userProfile.role);
   } catch (err) {
@@ -1016,6 +1016,9 @@ async function _submitEval(token) {
     return;
   }
 
+  // Convert 1-5 stars to 0-100 score
+  var score = rating * 20;
+
   try {
     var resp = await fetch("/api/supervisor/evaluate", {
       method: "POST",
@@ -1024,11 +1027,11 @@ async function _submitEval(token) {
         Authorization: "Bearer " + token
       },
       body: JSON.stringify({
-        student_id: window.currentStudentId,
-        visit_number: window.currentVisitNum,
-        rating: rating,
-        comments: comments,
-        visit_date: date
+        student_id:   window.currentStudentId,
+        visit_number: parseInt(window.currentVisitNum, 10),
+        score:        score,
+        comments:     comments,
+        visit_date:   date || null
       })
     });
     var result = await resp.json();

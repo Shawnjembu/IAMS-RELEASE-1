@@ -47,17 +47,31 @@ module.exports = async function handler(req, res) {
       if (student_ids.length === 0)
         return send(res, 200, { ok: true, reports: [] });
 
-      const { data, error } = await sb
+      const { data: reports, error } = await sb
         .from("industrial_reports")
-        .select(`
-          id, student_id, title, content, file_url, score, comments, status, submitted_at, reviewed_at,
-          student:profiles!industrial_reports_student_id_fkey(full_name, email)
-        `)
+        .select("id, student_id, title, content, file_url, score, comments, status, submitted_at, reviewed_at")
         .in("student_id", student_ids)
         .order("submitted_at", { ascending: false });
 
       if (error) return send(res, 500, { ok: false, error: error.message });
-      return send(res, 200, { ok: true, reports: data || [] });
+
+      // Fetch student profiles separately (two-step avoids brittle FK name references)
+      const reportStudentIds = [...new Set((reports || []).map(r => r.student_id))];
+      let studentMap = {};
+      if (reportStudentIds.length > 0) {
+        const { data: profs } = await sb
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", reportStudentIds);
+        (profs || []).forEach(p => { studentMap[p.id] = p; });
+      }
+
+      const enriched = (reports || []).map(r => ({
+        ...r,
+        student: studentMap[r.student_id] || null,
+      }));
+
+      return send(res, 200, { ok: true, reports: enriched });
     }
 
     // ---- PATCH: grade / comment ----

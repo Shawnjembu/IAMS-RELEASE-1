@@ -9,28 +9,41 @@ module.exports = async function handler(req, res) {
     const auth = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
     if (!auth) return send(res, 401, { ok: false, error: "Missing auth token" });
 
-    // Verify the token and get the user id
-    const userClient = createClient(
-      process.env.SUPABASE_URL || "",
-      process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-      { global: { headers: { Authorization: "Bearer " + auth } } }
-    );
-    const { data: { user }, error: uerr } = await userClient.auth.getUser(auth);
-    if (uerr || !user) return send(res, 401, { ok: false, error: "Invalid token" });
+    // Verify the token using user-scoped client (no token argument — it's in headers)
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const anonKey    = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!supabaseUrl || !anonKey) return send(res, 500, { ok: false, error: "Missing env vars" });
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${auth}` } }
+    });
+    const { data: authData, error: uerr } = await userClient.auth.getUser();
+    if (uerr || !authData || !authData.user) return send(res, 401, { ok: false, error: "Invalid token" });
+    const user = authData.user;
 
-    // Use admin client to fetch placement — bypasses RLS for simplicity
+    // Use admin client to fetch placement (bypasses RLS) then enrich org info
     const sb = adminClient();
-    const { data, error } = await sb
+    const { data: placement, error } = await sb
       .from("placements")
-      .select("*, profiles!placements_org_id_fkey(full_name, email)")
+      .select("*")
       .eq("student_id", user.id)
-      .order("created_at", { ascending: false })
+      .order("assigned_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (error) return send(res, 500, { ok: false, error: error.message });
 
-    return send(res, 200, { ok: true, placement: data || null });
+    // Fetch org profile separately (two-step avoids brittle FK name references)
+    let enriched = placement ? { ...placement } : null;
+    if (enriched && enriched.org_id) {
+      const { data: orgProfile } = await sb
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", enriched.org_id)
+        .maybeSingle();
+      enriched.org = orgProfile || null;
+    }
+
+    return send(res, 200, { ok: true, placement: enriched });
   } catch (e) {
     return send(res, 500, { ok: false, error: e.message });
   }
