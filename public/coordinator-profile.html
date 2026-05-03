@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Coordinator Profile</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+
+  <div class="page-body">
+    <div class="container-md">
+      <div class="flex-between mb-16">
+        <div>
+          <h1>Coordinator Profile</h1>
+          <p class="muted small">Manage your coordinator account details.</p>
+        </div>
+        <a href="/dashboard.html" class="btn btn-secondary btn-sm">← Back</a>
+      </div>
+
+      <div id="coord-alert" class="alert hidden"></div>
+
+      <form id="coordForm" novalidate>
+        <div class="card">
+          <div class="card-header"><h2>Profile Image</h2></div>
+          <div class="avatar-upload-card">
+            <div class="avatar-preview" id="coordAvatarPreview">C</div>
+            <div style="flex:1;min-width:240px">
+              <p class="small muted">Upload a profile image for the coordinator dashboard and messages area.</p>
+              <div class="inline-actions mt-8">
+                <label class="btn btn-secondary btn-sm" for="coordAvatar">Choose Image</label>
+                <input type="file" id="coordAvatar" accept="image/*" style="display:none"/>
+                <span class="small muted" id="coordAvatarName">No image selected</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>Coordinator Details</h2></div>
+          <div class="role-note">
+            <h3>Attachment Coordinator</h3>
+            <p>Manage placement workflow, monitor supervisor assignment, communicate with organisations and university supervisors, and resolve system-level issues.</p>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="coordName">Full name <span class="required">*</span></label>
+              <input type="text" id="coordName" required/>
+              <span class="field-error" id="coordName-err"></span>
+            </div>
+            <div class="form-group">
+              <label for="coordEmail">Email <span class="small muted">(cannot change)</span></label>
+              <input type="email" id="coordEmail" disabled/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="coordPhone">Phone number</label>
+              <input type="tel" id="coordPhone" placeholder="+267 3XX XXXX"/>
+            </div>
+            <div class="form-group">
+              <label for="coordRole">Role</label>
+              <input type="text" id="coordRole" value="Attachment Coordinator" disabled/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btnSaveCoord">
+            <span class="spinner"></span><span class="btn-label">Save Coordinator Profile</span>
+          </button>
+          <a href="/dashboard.html" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./coordinator-profile.js"></script>
+</body>
+</html>

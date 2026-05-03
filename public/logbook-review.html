@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Student Logbook Review</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <style>
+    .logbook-entry { padding: 16px; border-bottom: 1px solid var(--border); }
+    .logbook-entry:last-child { border-bottom: none; }
+    .entry-header  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .week-badge    { background: rgba(59,110,240,.18); color: var(--accent);
+                     padding: 2px 10px; border-radius: 20px; font-size: .8rem; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+
+  <div class="page-body">
+    <div class="container">
+      <div id="page-loading" class="muted text-center mt-24">Loading…</div>
+      <div id="page-content" style="display:none">
+
+        <div class="flex-between mb-16">
+          <div>
+            <h1 id="page-title">Student Logbook</h1>
+            <p class="muted small" id="page-subtitle"></p>
+          </div>
+          <a href="/students.html" class="btn btn-secondary btn-sm">← My Students</a>
+        </div>
+
+        <!-- Progress summary -->
+        <div class="card mb-16" style="padding:20px">
+          <div class="flex-between mb-8">
+            <h2>Weekly Progress</h2>
+            <span id="progress-label" class="small muted"></span>
+          </div>
+          <div id="week-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+            <!-- 12 cells built by JS -->
+          </div>
+        </div>
+
+        <!-- Entries -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Logbook Entries</h2>
+          </div>
+          <div id="entries-container">
+            <p class="muted small" style="padding:16px">Loading entries…</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./logbook-review.js"></script>
+</body>
+</html>

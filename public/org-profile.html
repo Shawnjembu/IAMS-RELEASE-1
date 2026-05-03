@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Organisation Profile</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <style>
+    .skills-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:8px; margin-top:8px; }
+    .skill-chip  { display:flex; align-items:center; gap:8px; padding:8px 12px;
+                   background:var(--bg-input); border:1.5px solid var(--border);
+                   border-radius:var(--radius-sm); cursor:pointer; transition:var(--transition); }
+    .skill-chip:hover     { border-color:var(--accent); }
+    .skill-chip input     { accent-color:var(--accent); width:16px; height:16px; cursor:pointer; }
+    .skill-chip.selected  { border-color:var(--accent); background:rgba(59,110,240,.12); }
+    .skill-chip span      { font-size:.875rem; color:var(--text); user-select:none; }
+    select.form-control   { background:var(--bg-input); color:var(--text); border:1px solid var(--border);
+                            border-radius:var(--radius-sm); padding:10px 12px; width:100%;
+                            font-family:inherit; font-size:.9rem; }
+    select.form-control:focus { border-color:var(--border-focus); outline:none; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+
+  <div class="page-body">
+    <div class="container-md">
+
+      <div class="flex-between mb-16">
+        <h1>Organisation Profile</h1>
+        <a href="/dashboard.html" class="btn btn-secondary btn-sm">← Back</a>
+      </div>
+
+      <div id="org-alert" class="alert hidden"></div>
+
+      <form id="orgForm" novalidate>
+
+        <div class="card">
+          <div class="card-header"><h2>Profile Image</h2></div>
+          <div class="avatar-upload-card">
+            <div class="avatar-preview" id="orgAvatarPreview">🏢</div>
+            <div style="flex:1;min-width:240px">
+              <p class="small muted">Upload the organisation logo or profile image for the dashboard and messages area.</p>
+              <div class="inline-actions mt-8">
+                <label class="btn btn-secondary btn-sm" for="orgAvatar">Choose Image</label>
+                <input type="file" id="orgAvatar" accept="image/*" style="display:none"/>
+                <span class="small muted" id="orgAvatarName">No image selected</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Organisation Details -->
+        <div class="card">
+          <div class="card-header"><h2>Organisation Details</h2></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="orgName">Organisation name <span class="required">*</span></label>
+              <input type="text" id="orgName" placeholder="e.g. Acme Corporation" required/>
+              <span class="field-error" id="orgName-err"></span>
+            </div>
+            <div class="form-group">
+              <label for="orgIndustry">Industry / Sector</label>
+              <input type="text" id="orgIndustry" placeholder="e.g. Information Technology, Banking"/>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="orgLocation">Location <span class="required">*</span></label>
+              <select id="orgLocation" class="form-control">
+                <option value="">Select city…</option>
+                <option>Gaborone</option>
+                <option>Francistown</option>
+                <option>Lobatse</option>
+                <option>Selebi-Phikwe</option>
+                <option>Maun</option>
+                <option>Serowe</option>
+                <option>Kanye</option>
+                <option>Molepolole</option>
+                <option>Mahalapye</option>
+                <option>Mogoditshane</option>
+                <option>Other</option>
+              </select>
+              <span class="field-error" id="orgLocation-err"></span>
+            </div>
+            <div class="form-group">
+              <label for="orgContact">Contact person <span class="required">*</span></label>
+              <input type="text" id="orgContact" placeholder="HR Manager name"/>
+              <span class="field-error" id="orgContact-err"></span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="orgPhone">Phone number</label>
+              <input type="tel" id="orgPhone" placeholder="+267 3XX XXXX"/>
+            </div>
+            <div class="form-group">
+              <label for="orgSlots">Available intern slots</label>
+              <input type="number" id="orgSlots" placeholder="e.g. 3" min="0" max="100"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email <span class="small muted">(cannot change)</span></label>
+            <input type="email" id="orgEmail" disabled/>
+          </div>
+        </div>
+
+        <!-- Required Skills -->
+        <div class="card">
+          <div class="card-header"><h2>Required Skills</h2></div>
+          <p class="small muted">Select the skills your interns need. These are used by the matching algorithm to find the best students for your organisation.</p>
+          <div class="skills-grid" id="org-skills-grid">
+            <!-- populated by JS -->
+          </div>
+          <div class="form-group mt-16">
+            <label for="orgOtherSkills">Other required skills <span class="small muted">(comma-separated)</span></label>
+            <input type="text" id="orgOtherSkills" placeholder="e.g. AutoCAD, MATLAB, SAP"/>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btnSaveOrg">
+            <span class="spinner"></span>
+            <span class="btn-label">Save Organisation Profile</span>
+          </button>
+          <a href="/dashboard.html" class="btn btn-secondary">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./org-profile.js"></script>
+</body>
+</html>

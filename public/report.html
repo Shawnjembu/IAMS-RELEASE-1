@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – My Report</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+  <div class="page-body">
+    <div class="container">
+      <div id="page-loading" class="muted text-center mt-24">Loading…</div>
+      <div id="page-content" style="display:none">
+        <div class="flex-between mb-16">
+          <h1>Final Industrial Report</h1>
+        </div>
+
+        <div id="report-alert" class="alert hidden mb-16"></div>
+
+        <div id="report-deadline-card" class="card mb-16" style="padding:18px;display:none">
+          <div class="flex-between mb-4">
+            <h2>Report Submission Deadline</h2>
+            <span id="report-deadline-status" class="status-pill info">Open</span>
+          </div>
+          <p class="small muted" id="report-deadline-text"></p>
+        </div>
+
+        <!-- Existing report summary -->
+        <div id="existing-report" class="card mb-16" style="padding:20px;display:none">
+          <div class="flex-between mb-8">
+            <h2>Submitted Report</h2>
+            <span id="rep-status-badge" class="badge-role student">submitted</span>
+          </div>
+          <p class="small"><strong>Title:</strong> <span id="rep-title">—</span></p>
+          <p class="small" id="rep-file-link"></p>
+          <p class="small" id="rep-score"></p>
+          <p class="small" id="rep-comments"></p>
+          <p class="small muted" id="rep-date"></p>
+        </div>
+
+        <!-- Submit / update form -->
+        <div class="card" style="padding:24px">
+          <h2 class="mb-16" id="form-heading">Submit Report</h2>
+          <form id="reportForm">
+            <div class="form-group">
+              <label>Report title <span class="required">*</span></label>
+              <input type="text" id="rep-inp-title" class="form-control" placeholder="e.g. Industrial Attachment Report — Acme Corp"/>
+              <span class="field-error" id="rep-inp-title-err"></span>
+            </div>
+            <div class="form-group">
+              <label>Summary / content (optional)</label>
+              <textarea id="rep-inp-content" rows="6" placeholder="Write a brief summary of your attachment experience…" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:10px;font-family:inherit;resize:vertical"></textarea>
+              <span class="field-error" id="rep-inp-content-err"></span>
+            </div>
+            <div class="form-group">
+              <label>Upload PDF report (optional)</label>
+              <input type="file" id="rep-inp-file" accept=".pdf,.doc,.docx"/>
+              <span class="small muted" id="rep-file-status"></span>
+              <span class="field-error" id="rep-inp-file-err"></span>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btnReport">
+              <span class="spinner"></span>
+              <span class="btn-label">Submit Report</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Grade view -->
+        <div class="card mt-16" style="padding:20px">
+          <h2 class="mb-8">My Assessment Grade</h2>
+          <p class="small muted mb-8">Your grade is computed as: 40% report score + 60% average of two university visit evaluations.</p>
+          <div id="grade-summary">
+            <p class="small muted">Grade not yet available.</p>
+          </div>
+          <a href="/assessment.html" class="btn btn-secondary btn-sm mt-8">Full Assessment Details</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./report.js"></script>
+</body>
+</html>

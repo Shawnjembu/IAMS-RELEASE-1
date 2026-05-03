@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Messages</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header"><a class="brand" href="/dashboard.html">IAMS</a></header>
+  <div class="page-body">
+    <div class="container">
+      <div id="page-loading" class="muted text-center mt-24">Loading…</div>
+      <div id="page-content" style="display:none">
+        <div class="flex-between mb-16"><h1>Messages</h1></div>
+        <div class="grid-2">
+          <div class="card" style="padding:0">
+            <div class="card-header"><h2>Contacts</h2></div>
+            <div id="msg-contacts"></div>
+          </div>
+          <div class="card" style="padding:0">
+            <div class="card-header"><h2 id="msg-thread-title">Conversation</h2></div>
+            <div id="msg-thread" style="padding:16px;min-height:340px;max-height:420px;overflow:auto"></div>
+            <form id="msg-form" style="padding:16px;border-top:1px solid var(--border);display:flex;gap:12px">
+              <input type="text" id="msg-input" class="form-control" placeholder="Type a message…"/>
+              <button class="btn btn-primary" id="msg-send" type="submit"><span class="spinner"></span><span class="btn-label">Send</span></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./messages.js"></script>
+</body>
+</html>

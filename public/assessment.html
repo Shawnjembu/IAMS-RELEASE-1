@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Review Summary</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+  <div class="page-body">
+    <div class="container">
+      <div id="page-loading" class="muted text-center mt-24">Loading…</div>
+      <div id="page-content" style="display:none">
+        <div class="flex-between mb-16">
+          <h1 id="page-title">Review Summary</h1>
+          <a href="/coordinator.html" class="btn btn-secondary btn-sm">← Back</a>
+        </div>
+
+        <div id="assess-alert" class="alert hidden mb-16"></div>
+
+        <div class="card mb-16" id="student-picker-section" style="padding:20px;display:none">
+          <h2 class="mb-8">Choose Student</h2>
+          <p class="small muted mb-12">Select a student to monitor review status. Coordinators do not grade or override marks.</p>
+          <div class="form-group" style="max-width:520px">
+            <label>Student <span class="required">*</span></label>
+            <select id="student-picker" class="form-control">
+              <option value="">Loading students…</option>
+            </select>
+            <span class="field-error" id="student-picker-err"></span>
+          </div>
+        </div>
+
+        <div id="assessment-details" style="display:none">
+        <!-- Grade card -->
+        <div class="card mb-16" style="padding:24px">
+          <h2 class="mb-16">Report and Review Summary</h2>
+          <div class="grid-3">
+            <div class="card" style="padding:16px;text-align:center">
+              <div class="small muted mb-4">Report score</div>
+              <div style="font-size:2rem;font-weight:700" id="g-report">—</div>
+            </div>
+            <div class="card" style="padding:16px;text-align:center">
+              <div class="small muted mb-4">Visit average</div>
+              <div style="font-size:2rem;font-weight:700" id="g-visits">—</div>
+            </div>
+            <div class="card" style="padding:16px;text-align:center;background:var(--primary);color:#fff">
+              <div class="small mb-4" style="opacity:.8">Overall result</div>
+              <div style="font-size:2.5rem;font-weight:700" id="g-final">—</div>
+              <div style="font-size:1.1rem" id="g-letter">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Component breakdown -->
+        <div class="grid-2 mb-16" style="gap:16px;display:grid;grid-template-columns:1fr 1fr">
+          <!-- Report -->
+          <div class="card" style="padding:20px">
+            <h3 class="mb-8">Final Report</h3>
+            <div id="report-detail">
+              <p class="small muted">No report submitted.</p>
+            </div>
+          </div>
+
+          <!-- Evaluations -->
+          <div class="card" style="padding:20px">
+            <h3 class="mb-8">University Visit Evaluations</h3>
+            <div id="evals-detail">
+              <p class="small muted">No evaluations recorded.</p>
+            </div>
+          </div>
+        </div>
+        </div><!-- /assessment-details -->
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./assessment.js"></script>
+</body>
+</html>

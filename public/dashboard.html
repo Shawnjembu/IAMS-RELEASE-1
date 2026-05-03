@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAMS – Dashboard | University of Botswana</title>
+  <link rel="stylesheet" href="/tailwind-local.css">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #003B5C 0%, #00A3E0 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,.1); }
+    .sidebar-link { transition: all 0.2s ease; }
+    .sidebar-link:hover { background-color: rgba(0,163,224,.1); border-left: 3px solid #00A3E0; }
+    .sidebar-link.active { background-color: rgba(0,59,92,.08); border-left: 3px solid #003B5C; color: #003B5C; font-weight: 600; }
+    .progress-bar  { height: 8px; border-radius: 4px; background: #e9ecef; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width .3s ease; }
+    .star-rating { transition: color 0.2s; }
+    .star-rating:hover, .star-rating.filled { color: #fbbf24; }
+    .modal-overlay { backdrop-filter: blur(4px); }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 font-inter dashboard-shell">
+
+  <!-- ── HEADER ── -->
+  <header class="gradient-bg text-white shadow-lg">
+    <nav class="container mx-auto px-4 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+            <span class="text-primary font-bold text-xl">UB</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold">CS Attachment Portal</h1>
+            <p class="text-sm text-blue-100">University of Botswana</p>
+          </div>
+        </div>
+
+        <!-- Dynamic nav injected by UI.renderNav -->
+        <div class="hidden md:flex items-center space-x-2" id="site-nav"></div>
+
+        <div class="flex items-center space-x-3">
+          <button id="notification-btn" class="relative p-2 rounded-full hover:bg-blue-800 transition">
+            <i class="fas fa-bell"></i>
+          </button>
+          <!-- User menu -->
+          <div class="relative" id="user-menu-container">
+            <button id="user-menu-btn" class="flex items-center space-x-2 bg-blue-800 hover:bg-blue-700 px-3 py-2 rounded-lg transition">
+              <div class="w-7 h-7 rounded-full bg-white overflow-hidden flex items-center justify-center" id="nav-avatar">
+                <i class="fas fa-user text-primary text-sm"></i>
+              </div>
+              <span class="text-sm hidden sm:block" id="nav-user-name">—</span>
+              <i class="fas fa-chevron-down text-xs"></i>
+            </button>
+            <div id="user-dropdown" class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 hidden z-50 text-gray-700">
+              <a href="/profile.html" id="dropdown-profile-link" class="flex items-center px-4 py-2 hover:bg-gray-100 sidebar-link text-sm"><i class="fas fa-user mr-3 w-4 text-center"></i>My Profile</a>
+              <hr class="my-1">
+              <a href="#" id="btn-signout" class="flex items-center px-4 py-2 hover:bg-gray-100 sidebar-link text-sm text-danger"><i class="fas fa-sign-out-alt mr-3 w-4 text-center"></i>Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ── LOADING ── -->
+  <div id="page-loading" class="flex items-center justify-center h-64 text-gray-500">
+    <div class="text-center">
+      <i class="fas fa-circle-notch fa-spin text-3xl text-primary mb-3"></i>
+      <p>Loading your dashboard…</p>
+    </div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div id="page-content" style="display:none" class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+      <!-- SIDEBAR -->
+      <aside class="lg:col-span-1 space-y-6">
+
+        <!-- Profile card -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <div class="flex items-center space-x-4 mb-6">
+            <div class="w-14 h-14 rounded-full bg-primary overflow-hidden flex items-center justify-center" id="sidebar-avatar">
+              <i class="fas fa-user text-white text-2xl"></i>
+            </div>
+            <div class="min-w-0">
+              <h3 class="font-semibold text-gray-800 truncate" id="sidebar-name">—</h3>
+              <p class="text-sm text-gray-500 truncate" id="sidebar-role-label">—</p>
+              <p class="text-xs text-gray-400 truncate" id="sidebar-email">—</p>
+            </div>
+          </div>
+
+          <!-- Sidebar nav — role-specific links injected below -->
+          <nav class="space-y-1" id="sidebar-menu"></nav>
+        </div>
+
+        <!-- Quick stats -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h4 class="font-semibold text-gray-700 mb-4">Quick Stats</h4>
+          <div class="grid grid-cols-2 gap-3" id="quick-stats">
+            <!-- populated per role -->
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="lg:col-span-3 space-y-6">
+
+        <!-- Welcome banner -->
+        <div id="dashboard-hero" class="gradient-bg role-hero text-white rounded-xl shadow-lg p-6">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-2xl font-bold mb-1" id="dash-greeting">Dashboard</h2>
+              <p class="text-blue-100 text-sm" id="dash-sub"></p>
+            </div>
+            <i class="fas fa-graduation-cap text-5xl opacity-30 hidden md:block"></i>
+          </div>
+        </div>
+
+        <div class="role-note">
+          <h3 id="role-title">Role</h3>
+          <p id="role-desc">Your role responsibilities will appear here.</p>
+        </div>
+
+        <!-- ════════ STUDENT DASHBOARD ════════ -->
+        <div id="dash-student" style="display:none">
+
+          <!-- ── Profile completion warning (shown when skills/location empty) ── -->
+          <div id="dash-profile-warning" style="display:none" class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+            <div class="flex items-start gap-4">
+              <div class="bg-amber-100 p-3 rounded-lg flex-shrink-0">
+                <i class="fas fa-user-edit text-amber-600 text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-bold text-gray-800 text-lg mb-1">Complete Your Profile to Get Matched</h3>
+                <p class="text-sm text-gray-600 mb-4">Add your skills and preferred location so the coordinator can match you with the right organisation. Takes 30 seconds!</p>
+                <div class="bg-white rounded-xl border border-amber-100 p-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
+                    <!-- Skills grid -->
+                    <div>
+                      <p class="text-sm font-semibold text-gray-700 mb-2">My Skills <span class="text-red-500">*</span></p>
+                      <div class="grid grid-cols-2 gap-1.5" id="quick-skills-grid">
+                        <!-- populated by dashboard.js -->
+                      </div>
+                    </div>
+                    <!-- Location + phone -->
+                    <div class="space-y-3">
+                      <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Preferred Location <span class="text-red-500">*</span></label>
+                        <select id="quick-location" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="">Select city…</option>
+                          <option>Gaborone</option><option>Francistown</option><option>Lobatse</option>
+                          <option>Selebi-Phikwe</option><option>Maun</option><option>Serowe</option>
+                          <option>Kanye</option><option>Molepolole</option><option>Mahalapye</option>
+                          <option>Mogoditshane</option><option>Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                        <input type="tel" id="quick-phone" placeholder="+267 7X XXX XXX"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="quick-profile-msg" class="hidden text-sm p-3 rounded-lg mb-3"></div>
+                  <div class="flex items-center gap-3 flex-wrap">
+                    <button id="btnQuickSave" class="bg-primary text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition flex items-center gap-2">
+                      <i class="fas fa-save"></i> Save &amp; Continue
+                    </button>
+                    <a href="/student-profile.html" class="text-sm text-primary font-medium hover:underline">
+                      Full profile editor <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats row -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-primary text-white p-3 rounded-lg"><i class="fas fa-book-open text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-logbook-count">—</div>
+                <div class="text-sm text-gray-500">Logbook Entries</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-success text-white p-3 rounded-lg"><i class="fas fa-building text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800 capitalize" id="stat-placement">Pending</div>
+                <div class="text-sm text-gray-500">Placement Status</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-warning text-white p-3 rounded-lg"><i class="fas fa-calendar-day text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-deadlines-s">—</div>
+                <div class="text-sm text-gray-500">Upcoming Deadlines</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <a href="/student-profile.html" class="bg-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 no-underline">
+              <div class="bg-primary text-white p-3 rounded-lg"><i class="fas fa-user-edit text-xl"></i></div>
+              <span class="font-semibold text-gray-800">Edit My Profile</span>
+              <span class="text-sm text-gray-500">Update skills &amp; preferences</span>
+            </a>
+            <button id="btn-logbook-upload" class="bg-accent text-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 hover:bg-accent-dark">
+              <div class="bg-accent-dark text-white p-3 rounded-lg"><i class="fas fa-book text-xl"></i></div>
+              <span class="font-semibold">Upload Logbook</span>
+              <span class="text-sm text-white/90">Week selector + PDF upload</span>
+            </button>
+            <a href="/placement.html" class="bg-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 no-underline">
+              <div class="bg-success text-white p-3 rounded-lg"><i class="fas fa-briefcase text-xl"></i></div>
+              <span class="font-semibold text-gray-800">View Placement</span>
+              <span class="text-sm text-gray-500">Check your assigned org</span>
+            </a>
+          </div>
+
+          <!-- Weekly Logbook Submission -->
+          <div id="student-logbook-section" class="bg-white rounded-xl shadow-md p-6 mb-6 hidden">
+            <div class="flex items-center gap-3 mb-6">
+              <i class="fas fa-book-open text-2xl text-primary"></i>
+              <h3 class="text-xl font-bold text-gray-800">Weekly Logbook Submission</h3>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold mb-2">Select Week <span class="text-red-500">*</span></label>
+                <select id="logbook-week" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+                  <option value="">Week 1-12</option>
+                </select>
+                <label class="block text-sm font-semibold mt-4 mb-1">Activities this week <span class="text-red-500">*</span></label>
+                <textarea id="logbook-activities" rows="3" placeholder="Describe what you did this week…"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary resize-vertical"></textarea>
+                <span class="text-red-500 text-xs hidden" id="logbook-activities-err"></span>
+                <label class="block text-sm font-semibold mt-3 mb-1">Attachment <span class="text-gray-400 font-normal">(PDF or DOCX, max 10 MB — optional)</span></label>
+                <input type="file" id="logbook-file" accept=".pdf,.docx" class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 hidden file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-accent-dark cursor-pointer">
+                <label for="logbook-file" class="mt-2 inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-accent-dark cursor-pointer transition">
+                  <i class="fas fa-upload mr-2"></i>Choose PDF/DOCX (max 10MB)
+                </label>
+                <p class="text-xs text-gray-500 mt-1">Only PDF & DOCX allowed, ≤10MB</p>
+                <div id="logbook-msg" class="mt-3 hidden"></div>
+              </div>
+              <div class="flex items-end">
+                <button id="btn-logbook-submit" class="bg-success text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center gap-2 ml-auto disabled:opacity-50">
+                  <i class="fas fa-paper-plane"></i> Submit Logbook
+                </button>
+              </div>
+            </div>
+
+            <!-- Submitted Logbooks Table -->
+            <div class="mt-8">
+              <h4 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-check-circle text-success"></i>Submitted Weeks</h4>
+              <div class="overflow-x-auto">
+                <table id="logbook-history" class="w-full bg-gray-50 rounded-lg">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Week</th>
+                      <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                      <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Submitted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td colspan="3" class="text-center py-8 text-gray-500">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p id="logbook-progress" class="mt-3 text-sm text-gray-600">0/12 weeks submitted</p>
+            </div>
+          </div>
+
+        </div><!-- /dash-student -->
+
+        <!-- ════════ ORGANISATION DASHBOARD ════════ -->
+        <div id="dash-org" style="display:none">
+
+          <!-- Stats row -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-primary text-white p-3 rounded-lg"><i class="fas fa-users text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-org-students">—</div>
+                <div class="text-sm text-gray-500">Students Assigned</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-accent text-white p-3 rounded-lg"><i class="fas fa-chair text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-org-slots">—</div>
+                <div class="text-sm text-gray-500">Available Slots</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-warning text-white p-3 rounded-lg"><i class="fas fa-calendar-day text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-deadlines-o">—</div>
+                <div class="text-sm text-gray-500">Upcoming Deadlines</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <button id="btn-org-skills-edit" class="bg-primary text-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 hover:bg-primary-dark">
+              <div class="bg-primary-dark text-white p-3 rounded-lg"><i class="fas fa-cogs text-xl"></i></div>
+              <span class="font-semibold">Update Requirements</span>
+              <span class="text-sm text-white/90">Edit skills &amp; location</span>
+            </button>
+            <a href="/students.html" class="bg-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 no-underline">
+              <div class="bg-accent text-white p-3 rounded-lg"><i class="fas fa-user-graduate text-xl"></i></div>
+              <span class="font-semibold text-gray-800">View Matched Students</span>
+              <span class="text-sm text-gray-500">All assigned interns</span>
+            </a>
+          </div>
+
+          <!-- Update Organisation Requirements -->
+          <div id="org-requirements-section" class="bg-white rounded-xl shadow-md p-6 mb-6 hidden">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-sliders-h text-primary"></i>Update Requirements</h3>
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold mb-3">Required Skills <span class="text-red-500">*</span></label>
+                <div id="org-skills-grid" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-lg">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-3">Location Preference</label>
+                <select id="org-location" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+                  <option value="">Any location</option>
+                  <option>Gaborone</option><option>Francistown</option><option>Lobatse</option><option>Selebi-Phikwe</option><option>Other</option>
+                </select>
+                <div class="flex gap-3 mt-6">
+                  <button id="btn-org-save" class="bg-primary text-white px-8 py-2 rounded-lg font-semibold hover:bg-accent-dark flex items-center gap-2">
+                    <i class="fas fa-save"></i> Save Changes
+                  </button>
+                  <button id="btn-org-cancel" class="bg-gray-200 text-gray-700 px-8 py-2 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
+                </div>
+                <div id="org-msg" class="mt-4 hidden"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Industrial Supervisors -->
+          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-user-tie text-primary"></i>Industrial Supervisors</h3>
+              <button id="btnToggleSupForm" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition">
+                <i class="fas fa-envelope mr-2"></i>Invite Supervisor
+              </button>
+            </div>
+
+            <!-- Create supervisor form (hidden by default) -->
+            <div id="org-sup-form" class="bg-gray-50 rounded-xl p-5 mb-6 hidden">
+              <h4 class="font-semibold text-gray-800 mb-4">Invite Industrial Supervisor</h4>
+              <div id="org-sup-alert" class="mb-4 hidden rounded-lg p-3 text-sm"></div>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input id="sup-name" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Jane Doe"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                  <input id="sup-email" type="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="supervisor@company.com"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Invite Method</label>
+                  <input value="Email invite / activation link" disabled class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-500"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                  <input id="sup-department" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Engineering"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input id="sup-phone" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="+27..."/>
+                </div>
+              </div>
+              <div class="flex gap-3 mt-4">
+                <button id="btnCreateSup" class="bg-primary text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition">
+                  <i class="fas fa-circle-notch fa-spin mr-2 hidden" id="sup-spinner"></i>Send Invite
+                </button>
+                <button id="btnCancelSup" type="button" class="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 transition">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Supervisors list -->
+            <div id="org-sup-list">
+              <p class="text-gray-500 text-sm">Loading supervisors…</p>
+            </div>
+          </div>
+
+          <!-- Matched Students Table -->
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-users text-accent"></i>Matched Students</h3>
+            <div id="org-students-table" class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Student</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">ID/Email</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Industrial Supervisor</th>
+                  </tr>
+                </thead>
+                <tbody id="org-students-body">
+                  <tr><td colspan="4" class="text-center py-8 text-gray-500">Loading students...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- /dash-org -->
+
+        <!-- ════════ COORDINATOR DASHBOARD ════════ -->
+        <div id="dash-coordinator" style="display:none">
+
+          <!-- Stats row -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-primary text-white p-3 rounded-lg"><i class="fas fa-user-graduate text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-coord-students">—</div>
+                <div class="text-sm text-gray-500">Total Students</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-accent text-white p-3 rounded-lg"><i class="fas fa-building text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-coord-orgs">—</div>
+                <div class="text-sm text-gray-500">Organisations</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-danger text-white p-3 rounded-lg"><i class="fas fa-exclamation-triangle text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-coord-unassigned">—</div>
+                <div class="text-sm text-gray-500">Unassigned Students</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <button id="btn-auto-match" class="bg-accent text-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 hover:bg-accent-dark col-span-2 md:col-span-1">
+              <div class="bg-accent-dark text-white p-3 rounded-lg"><i class="fas fa-magic text-xl"></i></div>
+              <span class="font-semibold text-lg">Run Auto-Match</span>
+              <span class="text-sm text-white/90">Match students to orgs by skills</span>
+            </button>
+            <a href="/coordinator.html" class="bg-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 no-underline">
+              <div class="bg-primary text-white p-3 rounded-lg"><i class="fas fa-user-check text-xl"></i></div>
+              <span class="font-semibold text-gray-800">Supervisor Workflow</span>
+              <span class="text-sm text-gray-500">Invite university supervisors and monitor assignments</span>
+            </a>
+            <a href="/deadlines.html" class="bg-white rounded-xl shadow-md p-5 card-hover flex flex-col items-center text-center space-y-3 no-underline">
+              <div class="bg-warning text-white p-3 rounded-lg"><i class="fas fa-calendar-alt text-xl"></i></div>
+              <span class="font-semibold text-gray-800">Deadlines</span>
+              <span class="text-sm text-gray-500">Set reminders</span>
+            </a>
+          </div>
+
+          <!-- Matching Section -->
+          <div id="coord-matching-section" class="space-y-6">
+            <!-- Unmatched Students -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+              <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-user-slash text-warning"></i>Unmatched Students (<span id="unmatched-count">0</span>)</h3>
+              <div id="unmatched-students" class="max-h-64 overflow-y-auto">
+                <p class="text-gray-500 text-center py-12">Click "Run Auto-Match" to see unmatched students</p>
+              </div>
+            </div>
+
+            <!-- Available Organisations -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+              <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-building text-success"></i>Available Organisations (<span id="avail-orgs-count">0</span>)</h3>
+              <div id="avail-orgs" class="max-h-64 overflow-y-auto">
+                <p class="text-gray-500 text-center py-12">Click "Run Auto-Match" to see available orgs</p>
+              </div>
+            </div>
+
+            <!-- Match Suggestions (hidden until run) -->
+            <div id="match-suggestions" class="bg-gradient-to-r from-accent to-success text-white rounded-xl shadow-lg p-8 hidden">
+              <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-handshake"></i>Match Suggestions</h3>
+              <div id="suggestions-list" class="space-y-4 max-h-96 overflow-y-auto"></div>
+              <div class="flex gap-3 mt-6 pt-6 border-t border-white/20">
+                <button id="btn-clear-matches" class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/30 transition flex items-center gap-2">
+                  <i class="fas fa-times"></i> Clear All
+                </button>
+                <button id="btn-export-matches" class="bg-white text-accent px-6 py-3 rounded-lg font-semibold hover:bg-white/90 transition flex items-center gap-2">
+                  <i class="fas fa-download"></i> Export CSV
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /dash-coordinator -->
+
+        <!-- ════════ SUPERVISOR DASHBOARD ════════ -->
+        <!-- Supervisor Dashboards - Inline -->
+        <div id="dash-supervisor" style="display:none" class="space-y-6">
+          <div id="supervisor-org-card" class="bg-white rounded-xl shadow-md p-5" style="display:none">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <div class="text-sm uppercase text-gray-500 font-semibold">Organisation</div>
+                <div class="text-xl font-bold text-gray-800" id="supervisor-org-name">—</div>
+                <div class="text-sm text-gray-500" id="supervisor-org-sub">Your workplace organisation</div>
+              </div>
+              <a href="/messages.html" class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-accent-dark transition flex items-center gap-2 no-underline">
+                <i class="fas fa-comments"></i> Open Messages
+              </a>
+            </div>
+          </div>
+          <!-- Stats - unchanged -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-primary text-white p-3 rounded-lg"><i class="fas fa-user-graduate text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-sup-students">—</div>
+                <div class="text-sm text-gray-500">My Students</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-5 flex items-center space-x-4">
+              <div class="bg-warning text-white p-3 rounded-lg"><i class="fas fa-clock text-xl"></i></div>
+              <div>
+                <div class="text-2xl font-bold text-gray-800" id="stat-sup-pending">—</div>
+                <div class="text-sm text-gray-500">Pending Reviews</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assigned Students Table w/ Action Buttons -->
+          <div id="supervisor-students-section" class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+              <i class="fas fa-users text-primary"></i>My Assigned Students
+              <span id="sup-students-count" class="bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold ml-3">0</span>
+            </h3>
+            <div id="sup-students-table" class="overflow-x-auto">
+              <table class="w-full min-w-[600px]">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Student</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Progress</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sup-students-body">
+                  <tr><td colspan="3" class="text-center py-12 text-gray-500">Loading students...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Action Modals (hidden) -->
+          <div id="report-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4" style="display:none">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div class="p-6 border-b">
+                <h3 class="text-xl font-bold flex items-center gap-3">
+                  <i class="fas fa-star text-warning"></i>Performance Report
+                </h3>
+              </div>
+              <div class="p-6">
+                <div class="mb-6">
+                  <label class="block text-sm font-semibold mb-2">Rating <span class="text-red-500">*</span></label>
+                  <div id="report-stars" class="flex gap-1 text-2xl text-gray-300 cursor-pointer">
+                    <i class="fas fa-star star-rating" data-rating="1"></i>
+                    <i class="fas fa-star star-rating" data-rating="2"></i>
+                    <i class="fas fa-star star-rating" data-rating="3"></i>
+                    <i class="fas fa-star star-rating" data-rating="4"></i>
+                    <i class="fas fa-star star-rating" data-rating="5"></i>
+                  </div>
+                  <p id="report-rating-val" class="text-sm text-gray-600 mt-1">Select rating</p>
+                </div>
+                <div class="mb-6">
+                  <label class="block text-sm font-semibold mb-2">Comments <span class="text-red-500">*</span></label>
+                  <textarea id="report-comments" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary resize-vertical" placeholder="Performance observations..."></textarea>
+                </div>
+                <div class="mb-6">
+                  <label class="flex items-center gap-2 text-sm font-semibold mb-2 cursor-pointer">
+                    <input type="file" id="report-file" accept=".pdf,.docx" class="sr-only">
+                    <i class="fas fa-paperclip text-primary"></i>Attach file (optional)
+                  </label>
+                </div>
+              </div>
+              <div class="p-6 bg-gray-50 border-t flex gap-3 justify-end rounded-b-2xl">
+                <button id="report-cancel" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">Cancel</button>
+                <button id="report-submit" class="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark flex items-center gap-2 disabled:opacity-50" disabled>
+                  <i class="fas fa-paper-plane"></i> Submit Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="eval-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4" style="display:none">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div class="p-6 border-b">
+                <h3 id="eval-title" class="text-xl font-bold flex items-center gap-3">
+                  <i class="fas fa-university text-accent"></i>Visit Evaluation
+                </h3>
+              </div>
+              <div class="p-6">
+                <div class="mb-6">
+                  <label class="block text-sm font-semibold mb-2">Rating <span class="text-red-500">*</span></label>
+                  <div id="eval-stars" class="flex gap-1 text-2xl text-gray-300 cursor-pointer">
+                    <i class="fas fa-star star-rating" data-rating="1"></i>
+                    <i class="fas fa-star star-rating" data-rating="2"></i>
+                    <i class="fas fa-star star-rating" data-rating="3"></i>
+                    <i class="fas fa-star star-rating" data-rating="4"></i>
+                    <i class="fas fa-star star-rating" data-rating="5"></i>
+                  </div>
+                  <p id="eval-rating-val" class="text-sm text-gray-600 mt-1">Select rating</p>
+                </div>
+                <div class="mb-6">
+                  <label class="block text-sm font-semibold mb-2">Comments <span class="text-red-500">*</span></label>
+                  <textarea id="eval-comments" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary resize-vertical" placeholder="Evaluation notes..."></textarea>
+                </div>
+                <div class="mb-6">
+                  <label class="block text-sm font-semibold mb-2">Visit Date</label>
+                  <input type="date" id="eval-date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+                </div>
+              </div>
+              <div class="p-6 bg-gray-50 border-t flex gap-3 justify-end rounded-b-2xl">
+                <button id="eval-cancel" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">Cancel</button>
+                <button id="eval-submit" class="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary flex items-center gap-2 disabled:opacity-50" disabled>
+                  <i class="fas fa-check"></i> Submit Evaluation
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /dash-supervisor -->
+
+        <!-- Assessment card for students -->
+        <div id="dash-student-assessment" style="display:none" class="bg-white rounded-xl shadow-md p-6 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">My Assessment &amp; Report</h3>
+            <a href="/report.html" class="text-primary hover:text-accent text-sm font-medium">View Details</a>
+          </div>
+          <div class="grid grid-cols-3 gap-3 text-center">
+            <div><div class="text-xl font-bold" id="stu-g-report">—</div><div class="text-xs text-gray-500">Report score</div></div>
+            <div><div class="text-xl font-bold" id="stu-g-visits">—</div><div class="text-xs text-gray-500">Visit avg</div></div>
+            <div><div class="text-xl font-bold text-primary" id="stu-g-final">—</div><div class="text-xs text-gray-500">Final grade</div></div>
+          </div>
+        </div>
+
+        <!-- ════════ UNKNOWN ROLE / SETUP NEEDED ════════ -->
+        <div id="dash-setup" style="display:none" class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+          <div class="flex items-start gap-4">
+            <div class="bg-red-100 p-3 rounded-lg flex-shrink-0">
+              <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-800 text-lg mb-1">Account Setup Incomplete</h3>
+              <p class="text-sm text-gray-600 mb-4">Your account role hasn't been configured yet. This usually happens when a coordinator or supervisor account is created manually. Please contact your coordinator to have your account properly set up.</p>
+              <div class="flex flex-wrap gap-3">
+                <a href="/profile.html" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition">
+                  <i class="fas fa-user mr-2"></i>Open My Profile
+                </a>
+                <button id="btn-setup-signout" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition">
+                  <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════ UPCOMING DEADLINES (all roles) ════════ -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Upcoming Deadlines</h3>
+            <a href="/deadlines.html" class="text-primary hover:text-accent text-sm font-medium">View All</a>
+          </div>
+          <div id="deadlines-list" class="text-gray-500 text-sm">No upcoming deadlines.</div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ── SCRIPTS ── -->
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script>
+    // Populate sidebar profile fields after protectRoute sets window._userProfile
+    document.addEventListener("DOMContentLoaded", function () {
+
+      // User menu toggle
+      document.getElementById("user-menu-btn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        document.getElementById("user-dropdown").classList.toggle("hidden");
+      });
+      document.addEventListener("click", function () {
+        document.getElementById("user-dropdown").classList.add("hidden");
+      });
+
+      // Sign out (main button)
+      document.getElementById("btn-signout").addEventListener("click", async function (e) {
+        e.preventDefault();
+        const sb = window._sb || supabase.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_PUBLISHABLE_KEY);
+        await sb.auth.signOut();
+        window.location.href = "/auth.html";
+      });
+
+      // Sign out (setup card button)
+      var setupSignout = document.getElementById("btn-setup-signout");
+      if (setupSignout) {
+        setupSignout.addEventListener("click", async function () {
+          const sb = window._sb || supabase.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_PUBLISHABLE_KEY);
+          await sb.auth.signOut();
+          window.location.href = "/auth.html";
+        });
+      }
+    });
+
+    // Fill sidebar once dashboard.js sets window._userProfile (with 5s timeout)
+    let _sidebarTicks = 0;
+    const _sidebarFill = setInterval(function () {
+      _sidebarTicks++;
+      const p = window._userProfile;
+      if (!p && _sidebarTicks < 50) return;   // wait up to 5 s (50 × 100 ms)
+      clearInterval(_sidebarFill);
+      if (!p) return;                          // timed out with no profile
+      const nameEl  = document.getElementById("sidebar-name");
+      const roleEl  = document.getElementById("sidebar-role-label");
+      const emailEl = document.getElementById("sidebar-email");
+      const navName = document.getElementById("nav-user-name");
+      if (nameEl)  nameEl.textContent  = p.full_name  || "—";
+      if (emailEl) emailEl.textContent = p.email || "—";
+      if (navName) navName.textContent = (p.full_name || p.email || "").split(" ")[0];
+
+      const roleLabels = {
+        student: "Student", organization: "Organisation", coordinator: "Coordinator",
+        industrial_supervisor: "Industrial Supervisor", university_supervisor: "University Supervisor"
+      };
+      if (roleEl) roleEl.textContent = roleLabels[p.role] || p.role;
+
+      // Supervisor dashboard links visibility
+      if (p.role === "industrial_supervisor") {
+        const el = document.getElementById("link-ind-sup");
+        if (el) el.style.display = "";
+      }
+      if (p.role === "university_supervisor") {
+        const el = document.getElementById("link-uni-sup");
+        if (el) el.style.display = "";
+      }
+
+      // Student assessment card visibility
+      if (p.role === "student") {
+        const aCard = document.getElementById("dash-student-assessment");
+        if (aCard) aCard.style.display = "";
+      }
+
+      // Role-specific sidebar links
+      const sidebarMenu = document.getElementById("sidebar-menu");
+      const links = {
+        student: [
+          { href: "/dashboard.html",      icon: "fas fa-home",        label: "Dashboard", active: true },
+          { href: "/student-profile.html", icon: "fas fa-user",        label: "My Profile" },
+          { href: "/logbook.html",         icon: "fas fa-book",        label: "Logbook" },
+          { href: "/report.html",          icon: "fas fa-file-alt",    label: "My Report" },
+          { href: "/placement.html",       icon: "fas fa-briefcase",   label: "Placement" },
+          { href: "/deadlines.html",       icon: "fas fa-calendar-alt",label: "Deadlines" },
+          { href: "/messages.html",        icon: "fas fa-comments",    label: "Messages" },
+        ],
+        organization: [
+          { href: "/dashboard.html",   icon: "fas fa-home",        label: "Dashboard", active: true },
+          { href: "/org-profile.html", icon: "fas fa-building",    label: "My Profile" },
+          { href: "/students.html",    icon: "fas fa-users",       label: "My Students" },
+          { href: "/deadlines.html",   icon: "fas fa-calendar-alt",label: "Deadlines" },
+          { href: "/messages.html",    icon: "fas fa-comments",    label: "Messages" },
+        ],
+        coordinator: [
+          { href: "/dashboard.html",    icon: "fas fa-home",            label: "Dashboard", active: true },
+          { href: "/coordinator-profile.html", icon: "fas fa-user-cog", label: "My Profile" },
+          { href: "/coordinator.html",  icon: "fas fa-tachometer-alt",  label: "Panel" },
+          { href: "/students.html",     icon: "fas fa-user-graduate",   label: "Students" },
+          { href: "/matching.html",     icon: "fas fa-random",          label: "Matching" },
+          { href: "/matching.html",      icon: "fas fa-building",        label: "Organisations & Slots" },
+          { href: "/deadlines.html",    icon: "fas fa-calendar-alt",    label: "Deadlines" },
+          { href: "/messages.html",     icon: "fas fa-comments",        label: "Messages" },
+        ],
+        industrial_supervisor: [
+          { href: "/dashboard.html",             icon: "fas fa-home",          label: "Dashboard", active: true },
+          { href: "/supervisor-profile.html",    icon: "fas fa-id-card",       label: "My Profile" },
+          { href: "/supervisor-industrial.html", icon: "fas fa-users",         label: "My Students" },
+          { href: "/messages.html",              icon: "fas fa-comments",      label: "Messages" },
+        ],
+        university_supervisor: [
+          { href: "/dashboard.html",             icon: "fas fa-home",          label: "Dashboard", active: true },
+          { href: "/supervisor-profile.html",    icon: "fas fa-id-card",       label: "My Profile" },
+          { href: "/supervisor-university.html", icon: "fas fa-file-signature",label: "Reports & Visits" },
+          { href: "/deadlines.html",             icon: "fas fa-calendar-alt",  label: "Deadlines" },
+          { href: "/messages.html",              icon: "fas fa-comments",      label: "Messages" },
+        ],
+      };
+      const items = links[p.role] || links.student;
+      sidebarMenu.innerHTML = items.map(function (item) {
+        return '<a href="' + item.href + '" class="flex items-center px-3 py-2 rounded-lg text-gray-700 sidebar-link text-sm' +
+               (item.active ? ' active' : '') + '">' +
+               '<i class="' + item.icon + ' mr-3 w-4 text-center text-gray-400"></i>' +
+               item.label + '</a>';
+      }).join("");
+
+      // Quick stats
+      const statsEl = document.getElementById("quick-stats");
+      const statsMap = {
+        student: [
+          { label: "Logbooks",  id: "qs-logbooks",  icon: "fas fa-book",       color: "text-primary" },
+          { label: "Placement", id: "qs-placement",  icon: "fas fa-briefcase",  color: "text-success" },
+          { label: "Deadlines", id: "qs-deadlines",  icon: "fas fa-calendar",   color: "text-warning" },
+        ],
+        organization: [
+          { label: "Students",  id: "qs-students",  icon: "fas fa-users",      color: "text-primary" },
+          { label: "Slots",     id: "qs-slots",      icon: "fas fa-chair",      color: "text-accent"  },
+          { label: "Deadlines", id: "qs-deadlines",  icon: "fas fa-calendar",   color: "text-warning" },
+        ],
+        coordinator: [
+          { label: "Students",    id: "qs-students",    icon: "fas fa-user-graduate", color: "text-primary" },
+          { label: "Orgs",        id: "qs-orgs",         icon: "fas fa-building",      color: "text-accent"  },
+          { label: "Unassigned",  id: "qs-unassigned",   icon: "fas fa-exclamation",   color: "text-danger"  },
+        ],
+        industrial_supervisor: [
+          { label: "Students", id: "qs-sup-students", icon: "fas fa-users", color: "text-primary" },
+          { label: "Reviews",  id: "qs-sup-reviews",  icon: "fas fa-clipboard-check", color: "text-warning" },
+        ],
+        university_supervisor: [
+          { label: "Students", id: "qs-sup-students", icon: "fas fa-users", color: "text-primary" },
+          { label: "Visits",   id: "qs-sup-visits",   icon: "fas fa-university", color: "text-accent" },
+        ],
+      };
+      const statsItems = statsMap[p.role] || [];
+      statsEl.innerHTML = statsItems.map(function (s) {
+        return '<div class="bg-gray-50 rounded-lg p-3 text-center">' +
+               '<i class="' + s.icon + ' ' + s.color + ' text-xl mb-1"></i>' +
+               '<div class="text-lg font-bold text-gray-800" id="' + s.id + '">—</div>' +
+               '<div class="text-xs text-gray-500">' + s.label + '</div>' +
+               '</div>';
+      }).join("");
+    }, 100);
+  </script>
+  <script src="./dashboard.js"></script>
+</body>
+</html>

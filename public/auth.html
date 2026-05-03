@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Sign In / Register</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body class="auth-bg">
+
+<div class="auth-page">
+  <div class="auth-box">
+
+    <div class="auth-logo">
+      <h1>IAMS</h1>
+      <p>Industrial Attachment Management System</p>
+    </div>
+
+    <div class="card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">Sign In</div>
+        <div class="auth-tab" data-tab="register">Register</div>
+      </div>
+
+      <!-- =================== LOGIN PANEL =================== -->
+      <div class="auth-panel active" id="panel-login">
+        <div id="login-alert" class="alert hidden"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="logEmail">Email address <span class="required">*</span></label>
+            <input type="email" id="logEmail" placeholder="201801639@ub.co.bw"
+                   required autocomplete="email"/>
+            <span class="field-error" id="logEmail-err"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="logPass">Password <span class="required">*</span></label>
+            <input type="password" id="logPass" placeholder="Your password"
+                   required autocomplete="current-password"/>
+            <span class="field-error" id="logPass-err"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="logRole">Login as <span class="required">*</span></label>
+            <select id="logRole" required>
+              <option value="">Choose your dashboard role…</option>
+              <option value="student">Student</option>
+              <option value="organization">Organisation</option>
+              <option value="coordinator">Coordinator</option>
+              <option value="industrial_supervisor">Industrial Supervisor</option>
+              <option value="university_supervisor">University Supervisor</option>
+            </select>
+            <span class="field-hint">This must match your actual account role. It prevents users opening the wrong dashboard.</span>
+            <span class="field-error" id="logRole-err"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-with-icon" id="btnLogin">
+            <span class="spinner"></span>
+            <span class="btn-label">Sign In</span>
+          </button>
+        </form>
+
+        <p class="text-center mt-16 small muted">
+          No account yet? <a href="#" data-switch="register">Register here</a>
+        </p>
+      </div><!-- /login panel -->
+
+      <!-- =================== REGISTER PANEL =================== -->
+      <div class="auth-panel" id="panel-register">
+        <div id="reg-alert" class="alert hidden"></div>
+
+        <form id="regForm" novalidate>
+
+          <!-- Role selector — shown first so fields below update immediately -->
+          <div class="form-group">
+            <label for="regRole">I am registering as <span class="required">*</span></label>
+            <select id="regRole">
+              <option value="student">Student</option>
+              <option value="organization">Organisation</option>
+            </select>
+            <span class="field-hint" id="regRole-hint">Students submit logbooks &amp; reports. Organisations host interns.</span>
+          </div>
+
+          <!-- Common fields -->
+          <div class="form-group" id="wrap-regName">
+            <label for="regName" id="label-regName">Full name <span class="required">*</span></label>
+            <input type="text" id="regName" placeholder="Your full name" required/>
+            <span class="field-error" id="regName-err"></span>
+          </div>
+
+          <!-- Student-only fields -->
+          <div id="fields-student">
+            <div class="alert alert-info">
+              Student accounts only need your name, email and password at registration.
+              After signing in, complete your academic details, skills and placement preferences once in My Profile.
+            </div>
+          </div>
+
+          <!-- Organisation-only fields -->
+          <div id="fields-org" style="display:none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regOrgName">Company / Organisation name <span class="required">*</span></label>
+                <input type="text" id="regOrgName" placeholder="e.g. Tech Solutions Ltd"/>
+                <span class="field-error" id="regOrgName-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="regIndustry">Industry <span class="required">*</span></label>
+                <select id="regIndustry">
+                  <option value="">Select industry</option>
+                  <option>Information Technology</option>
+                  <option>Finance &amp; Banking</option>
+                  <option>Healthcare</option>
+                  <option>Engineering</option>
+                  <option>Education</option>
+                  <option>Manufacturing</option>
+                  <option>Government</option>
+                  <option>Retail &amp; Commerce</option>
+                  <option>Other</option>
+                </select>
+                <span class="field-error" id="regIndustry-err"></span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regContact">Contact person <span class="required">*</span></label>
+                <input type="text" id="regContact" placeholder="Full name of contact"/>
+                <span class="field-error" id="regContact-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="regOrgLocation">City / Location <span class="required">*</span></label>
+                <input type="text" id="regOrgLocation" placeholder="e.g. Gaborone"/>
+                <span class="field-error" id="regOrgLocation-err"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="regSlots">Intern slots available</label>
+              <input type="number" id="regSlots" placeholder="e.g. 3" min="0" max="50"/>
+            </div>
+          </div>
+
+          <!-- Email + Password (always shown) -->
+          <div class="form-group">
+            <label for="regEmail">Email address <span class="required">*</span></label>
+            <input type="email" id="regEmail" placeholder="201801639@ub.co.bw"
+                   required autocomplete="email"/>
+            <span class="field-error" id="regEmail-err"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="regPass">Password <span class="required">*</span></label>
+            <input type="password" id="regPass" placeholder="Min 6 characters"
+                   required minlength="6" autocomplete="new-password"/>
+            <span class="field-error" id="regPass-err"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="regConfirmPass">Confirm password <span class="required">*</span></label>
+            <input type="password" id="regConfirmPass" placeholder="Re-enter password"
+                   required minlength="6" autocomplete="new-password"/>
+            <span class="field-error" id="regConfirmPass-err"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" id="btnReg">
+            <span class="spinner"></span>
+            <span class="btn-label">Create Account</span>
+          </button>
+        </form>
+
+        <p class="text-center mt-16 small muted">
+          Already registered? <a href="#" data-switch="login">Sign in</a>
+        </p>
+      </div><!-- /register panel -->
+
+    </div><!-- /card -->
+  </div><!-- /auth-box -->
+</div>
+
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./_ui.js"></script>
+<script src="./auth.js"></script>
+</body>
+</html>

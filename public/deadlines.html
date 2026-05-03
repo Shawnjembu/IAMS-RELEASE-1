@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Deadlines</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/dashboard.html">IAM<span>S</span></a>
+  </header>
+  <div class="page-body">
+    <div class="container">
+      <div id="page-loading" class="muted text-center mt-24">Loading…</div>
+      <div id="page-content" style="display:none">
+
+        <div class="flex-between mb-16">
+          <h1>Deadlines</h1>
+        </div>
+
+        <!-- Supervisor: create form -->
+        <div id="create-section" style="display:none" class="card mb-16">
+          <div class="card-header"><h2>Create Deadline</h2></div>
+          <div style="padding:0 16px 8px" class="small muted">University supervisors create student submission deadlines. Report deadlines are visible to assigned students only and late report submission is blocked after the due date.</div>
+          <div id="deadline-alert" class="alert hidden" style="margin:16px 16px 0"></div>
+          <form id="deadlineForm" style="padding:16px;max-width:560px">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Deadline type <span class="required">*</span></label>
+                <select id="dl-type" class="form-control">
+                  <option value="report">Final report submission</option>
+                  <option value="logbook">Logbook submission</option>
+                  <option value="other">Other student submittable</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Due date <span class="required">*</span></label>
+                <input type="date" id="dl-due" class="form-control"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Title <span class="required">*</span></label>
+              <input type="text" id="dl-title" class="form-control" placeholder="e.g. Final report submission deadline"/>
+            </div>
+            <div class="form-group">
+              <label>Audience</label>
+              <select id="dl-audience" class="form-control">
+                <option value="assigned_students">All my assigned students</option>
+                <option value="specific_student">One assigned student</option>
+                
+              </select>
+            </div>
+            <div class="form-group" id="dl-specific-wrap">
+              <label>Specific student <span class="small muted">(optional)</span></label>
+              <select id="dl-student" class="form-control">
+                <option value="">No specific student</option>
+              </select>
+              <span class="field-hint">Use this when the deadline applies to one assigned student only.</span>
+            </div>
+            <div class="form-group">
+              <label>Message / notes</label>
+              <textarea id="dl-message" rows="3" class="form-control" placeholder="Optional additional details…"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btnDeadline">
+              <span class="spinner"></span>
+              <span class="btn-label">Create Deadline</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Deadline list -->
+        <div class="card">
+          <div class="card-header"><h2>Upcoming Deadlines</h2></div>
+          <div id="deadlines-list" style="padding:16px">
+            <p class="muted small">Loading…</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./deadlines.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>IAMS – Accept Supervisor Invite</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/auth.html">CS Attachment Portal</a>
+  </header>
+  <div class="page-body">
+    <div class="container-sm">
+      <div class="card">
+        <div class="card-header"><h1>Accept Supervisor Invite</h1></div>
+        <p class="muted small mb-16">Create your password to activate your supervisor dashboard. Industrial supervisors review workplace progress. University supervisors complete visit evaluations.</p>
+        <div id="invite-alert" class="alert hidden mb-16"></div>
+        <form id="inviteForm">
+          <div class="form-group">
+            <label>Full name</label>
+            <input type="text" id="fullName" placeholder="Your name"/>
+          </div>
+          <div class="form-group">
+            <label>Password <span class="required">*</span></label>
+            <input type="password" id="password" placeholder="Minimum 6 characters"/>
+            <span class="field-error" id="password-err"></span>
+          </div>
+          <div class="form-group">
+            <label>Confirm password <span class="required">*</span></label>
+            <input type="password" id="confirmPassword" placeholder="Repeat password"/>
+            <span class="field-error" id="confirmPassword-err"></span>
+          </div>
+          <button class="btn btn-primary btn-lg" id="btnAccept" type="submit"><span class="spinner"></span><span class="btn-label">Activate Account</span></button>
+        </form>
+        <p class="small muted mt-16">After activation, sign in normally from the login page.</p>
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./_ui.js"></script>
+  <script src="./supervisor-invite.js"></script>
+</body>
+</html>
